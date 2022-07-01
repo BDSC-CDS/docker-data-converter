@@ -1,0 +1,7 @@
+# Pandas
+pandas==1.3.4
+
+# RDFlib
+rdflib==6.0.2
+
+
