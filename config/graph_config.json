@@ -1,7 +1,7 @@
 {
     "parameters": {
         "ONTOLOGY_GRAPH_LOCATION": "/ontology/main_ontologies/",
-        "TERMINOLOGIES_LOCATION": "/ontoogy/external_terminologies/",
+        "TERMINOLOGIES_LOCATION": "/ontology/external_terminologies/",
         "RDF_FORMAT": "ttl",
         "PREF_LANGUAGE": "fr",
         "ALWAYS_DEEP": "False",
