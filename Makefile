@@ -8,7 +8,7 @@ UNITS_GRAPH_LOCATION = /home/ju5750/units
 OUTPUT_TABLES_LOCATION = /home/ju5750/output_tables
 
 # COPY YOUR ABSOLUTE PATH TO THE DATA GRAPHS HERE
-DATALOCATION = /home/ju5750/data
+DATALOCATION = /home/ju5750/data/melanoma
 
 CONFIG_FOLDER = /home/ju5750/docker-data-converter/config
 
@@ -40,5 +40,4 @@ bash:
 debug: 
 	sed -i 's/"DEBUG":"False"/"DEBUG":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATALOCATION):/data -v $(DEBUG_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
-	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 
