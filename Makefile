@@ -16,9 +16,11 @@ CONFIG_FOLDER = /home/ju5750/docker-data-converter/config
 build:
 	docker build . -t data-converter:latest   
 up:
+	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it --name data_converter -v $(DATALOCATION):/data -v $(UNITS_GRAPH_LOCATION):/units -v  $(OUTPUT_TABLES_LOCATION):/output_tables -v $(CONFIG_FOLDER):/config data-converter:latest
 
 up-d:
+	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATALOCATION):/data -v $(OUTPUT_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
 
 follow:
@@ -36,5 +38,7 @@ bash:
 	docker exec -it data_converter bash
 	
 debug: 
+	sed -i 's/"DEBUG":"False"/"DEBUG":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATALOCATION):/data -v $(DEBUG_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
+	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 
