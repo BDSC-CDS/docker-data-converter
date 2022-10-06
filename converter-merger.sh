@@ -34,8 +34,8 @@ main () {
 	[[ "${DESTDIR}" != */ ]] && DESTDIR="${DESTDIR}/"
 	mkdir -p $DESTDIR
 	if $# == 1 ; then
-		TOMERGEDIRS=$(ls $1)
-		SOURCEDIRS=$(ls $1)
+		TOMERGEDIRS=($(ls $1))
+		SOURCEDIRS=($(ls $1))
 	else
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
@@ -43,8 +43,9 @@ main () {
 	case $tgt in 
 		"convert")
 			echo "Ready to convert the files."
+			TOMERGEDIRS=()
 			loop_convert ${SOURCEDIRS[@]} 
-			echo "The graphs were converted and the outputs are available in the following directories: ${TMPDIRS[@]}."
+			echo "The graphs were converted and the outputs are available in the following directories: ${TOMERGEDIRS[@]}."
 			;;
 		"merge")
 			echo "Ready to merge the records located in ${TOMERGEDIRS[@]}."
