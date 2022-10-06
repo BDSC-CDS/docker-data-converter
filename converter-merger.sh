@@ -170,8 +170,8 @@ merge () {
 
 		# Propagate all the changes in OBSERVATION_FACT (except for -1 encounters which we do not touch)
 		awk -v offset=$OFFSET_PN '(NR>1), $2+=offset' FS=, OFS=, "$OF" > "${DESTDIR}tmp_of"
-		awk -v offset_=$OFFSET_EN '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp_of"
-		#If needed adapt this to increment text_search_index: awk -v offset=$OFFSET_TSI '(NR>1), $23+=offset' FS=, OFS=, "$OF" >> ${DESTDIR}${OF_BASE}
+		awk -v offset_=$OFFSET_EN '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" && rm "${DESTDIR}tmp_of"
+		awk -v offset=$OFFSET_TSI '$23+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp2_of"
 	
 		# Update PROVIDER_DIMENSION by appending the new providers if not already in the target file 
 		comm -13 <(sort ${DESTDIR}${PR_BASE}) <(sort ${PR}) >> ${DESTDIR}${PR_BASE}
