@@ -35,9 +35,9 @@ main () {
 	mkdir -p $DESTDIR
 	if [ $# == 1 ] ; then
 		lsmerges=($(ls $1))
-		TOMERGEDIRS=("${lsmerges[@]}/#/${DESTDIR}")
+		TOMERGEDIRS=("${lsmerges[@]/#/${DESTDIR}}")
 		lssource=($(ls $1))
-		SOURCEDIRS=("${lssource[@]}/#/${DESTDIR}")
+		SOURCEDIRS=("${lssource[@]/#/${DESTDIR}}")
 	else
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
