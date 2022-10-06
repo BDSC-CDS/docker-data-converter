@@ -33,9 +33,11 @@ main () {
 	# Adding trailing slash
 	[[ "${DESTDIR}" != */ ]] && DESTDIR="${DESTDIR}/"
 	mkdir -p $DESTDIR
-	if $# == 1 ; then
-		TOMERGEDIRS=($(ls $1))
-		SOURCEDIRS=($(ls $1))
+	[ if $# == 1 ] ; then
+		lsmerges=($(ls $1))
+		TOMERGEDIRS=("${lsmerges[@]}/#/${DESTDIR}")
+		lssource=($(ls $1))
+		SOURCEDIRS=("${lssource[@]}/#/${DESTDIR}")
 	else
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
