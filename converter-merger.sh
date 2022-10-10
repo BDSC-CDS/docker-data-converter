@@ -2,12 +2,17 @@
 set -Eeuo pipefail
 
 
-# Use this script by calling it with the N paths to folders containing the N shares of the data
+# Use this script by calling it with the N paths to folders containing the N shares of data (either raw CSV/converted CSV, see below)
+# You will be prompted for a destination folder
+#
 # Ex: $ bash merge.sh ../data/run1/ ../converter_output/run2 ../converter_output/run3
+# OR with only one argument being a root directory containing the n directories mentioned above
+# Ex: $ bash merge.sh ../data_batches/
 #
 # With run1, run2 and run3 directories each containing a set of RDF data graphs.
 #
-# If running the script with flag --merge-only, pass then the list of subfolders containing your converted CSV data files. You will be prompted for a destination folder after.
+# If you already converted your data, use the script in the same fashion with the flag --merge-only, and where the subfolders  contain your converted CSV data files. 
+# If you only want to convert your data but not merge the resulting runs, use the flag --convert-only.
 
 main () {
 	tgt="all"
@@ -35,9 +40,10 @@ main () {
 	mkdir -p $DESTDIR
 	if [ $# == 1 ] ; then
 		lsmerges=($(ls $1))
-		TOMERGEDIRS=("${lsmerges[@]/#/${DESTDIR}}")
+		TOMERGEDIRS=("${lsmerges[@]/#/$1\/}")
+		echo "dirs to merge: ${TOMERGEDIRS[@]}"
 		lssource=($(ls $1))
-		SOURCEDIRS=("${lssource[@]/#/${DESTDIR}}")
+		SOURCEDIRS=("${lssource[@]/#/$1\/}")
 	else
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
@@ -129,8 +135,8 @@ merge () {
 	EM_BASE="ENCOUNTER_MAPPING.csv"
 	PR_BASE="PROVIDER_DIMENSION.csv"
 	
-	OFFSET_PN=0
-	OFFSET_EN=0
+	OFFSET_PATIENT=0
+	OFFSET_ENCOUNTER=0
 	OFFSET_TSI=0
 
 
@@ -156,29 +162,29 @@ merge () {
 		[ -f ${DESTDIR}${EM_BASE} ] || awk 'NR==1' "$EM" > ${DESTDIR}${EM_BASE}
 		[ -f ${DESTDIR}${VD_BASE} ] || awk 'NR==1' "$VD" > ${DESTDIR}${VD_BASE}
 		[ -f ${DESTDIR}${PR_BASE} ] || awk 'NR==1' "$PR" > ${DESTDIR}${PR_BASE}
-		echo "Beginning of iteration $i : shifting will be of $OFFSET_PN patients and $OFFSET_EN encounters"	
+		echo "Beginning of iteration $i : shifting will be of $OFFSET_PATIENT patients and $OFFSET_ENCOUNTER encounters"	
 
 		# Patient number is first field in PATIENT_DIMENSION, second field in VISIT_DIMENSION, third field in PATIENT_MAPPING
-		awk -v offset=$OFFSET_PN '(NR>1), $3+=offset' FS=, OFS=, "$PM" >> ${DESTDIR}${PM_BASE}
-		awk -v offset=$OFFSET_PN '(NR>1), $1+=offset' FS=, OFS=, "$PD" >> ${DESTDIR}${PD_BASE}
+		awk -v offset=$OFFSET_PATIENT '(NR>1), $3+=offset' FS=, OFS=, "$PM" >> ${DESTDIR}${PM_BASE}
+		awk -v offset=$OFFSET_PATIENT '(NR>1), $1+=offset' FS=, OFS=, "$PD" >> ${DESTDIR}${PD_BASE}
 
 		# Add offset to the encounter numbers as well. Discard -1 encounters.
 	        # No need to update patient num in EM because it's empty (-1)
-		awk -v offset=$OFFSET_EN '(NR>1) && ($4>0), $4+=offset' FS=, OFS=, "$EM" >> ${DESTDIR}${EM_BASE}
-		awk -v offset=$OFFSET_EN '(NR>1) && ($1>0), $1+=offset' FS=, OFS=, "$VD" > "${DESTDIR}tmp_vd"
-		awk -v offset=$OFFSET_PN '$2+=offset' FS=, OFS=, "${DESTDIR}tmp_vd" >> ${DESTDIR}${VD_BASE} && rm "${DESTDIR}tmp_vd"
+		awk -v offset=$OFFSET_ENCOUNTER '(NR>1) && ($4>0), $4+=offset' FS=, OFS=, "$EM" >> ${DESTDIR}${EM_BASE}
+		awk -v offset=$OFFSET_ENCOUNTER '(NR>1) && ($1>0), $1+=offset' FS=, OFS=, "$VD" > "${DESTDIR}tmp_vd"
+		awk -v offset=$OFFSET_PATIENT '$2+=offset' FS=, OFS=, "${DESTDIR}tmp_vd" >> ${DESTDIR}${VD_BASE} && rm "${DESTDIR}tmp_vd"
 
 		# Propagate all the changes in OBSERVATION_FACT (except for -1 encounters which we do not touch)
-		awk -v offset=$OFFSET_PN '(NR>1), $2+=offset' FS=, OFS=, "$OF" > "${DESTDIR}tmp_of"
-		awk -v offset_=$OFFSET_EN '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" && rm "${DESTDIR}tmp_of"
+		awk -v offset=$OFFSET_PATIENT '(NR>1), $2+=offset' FS=, OFS=, "$OF" > "${DESTDIR}tmp_of"
+		awk -v offset_=$OFFSET_ENCOUNTER '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" && rm "${DESTDIR}tmp_of"
 		awk -v offset=$OFFSET_TSI '$23+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp2_of"
 	
 		# Update PROVIDER_DIMENSION by appending the new providers if not already in the target file 
 		comm -13 <(sort ${DESTDIR}${PR_BASE}) <(sort ${PR}) >> ${DESTDIR}${PR_BASE}
 
 		# Update all offsets
-		OFFSET_PN=$(($OFFSET_PN+$(wc -l < $PD) -1))
-		OFFSET_EN=$(($OFFSET_EN+$(wc -l < $VD) -1))
+		OFFSET_PATIENT=$(($OFFSET_PATIENT+$(wc -l < $PD) -1))
+		OFFSET_ENCOUNTER=$(($OFFSET_ENCOUNTER+$(wc -l < $VD) -1))
 		OFFSET_TSI=$(($OFFSET_TSI+$(wc -l < $OF) -1))
 	done
 }
