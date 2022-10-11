@@ -176,8 +176,8 @@ merge () {
 
 		# Propagate all the changes in OBSERVATION_FACT (except for -1 encounters which we do not touch)
 		awk -v offset=$OFFSET_PATIENT '(NR>1), $2+=offset' FS=, OFS=, "$OF" > "${DESTDIR}tmp_of"
-		awk -v offset=$OFFSET_ENCOUNTER '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" #&& rm "${DESTDIR}tmp_of"
-		awk -v offset=$OFFSET_TSI '$23+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} #&& rm "${DESTDIR}tmp2_of"
+		awk -v offset=$OFFSET_ENCOUNTER '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" && rm "${DESTDIR}tmp_of"
+		awk -v offset=$OFFSET_TSI '$23+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp2_of"
 	
 		# Update PROVIDER_DIMENSION by appending the new providers if not already in the target file 
 		comm -13 <(sort ${DESTDIR}${PR_BASE}) <(sort ${PR}) >> ${DESTDIR}${PR_BASE}
