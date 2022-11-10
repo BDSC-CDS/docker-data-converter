@@ -37,7 +37,12 @@ wipe:
 bash:
 	docker exec -it data_converter bash
 	
-debug: 
+verbose: 
 	sed -i 's/"DEBUG":"False"/"DEBUG":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATALOCATION):/data -v $(DEBUG_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
+
+prod_from_debug:
+	@[ -f $(DEBUG_TABLES_LOCATION)/CONCEPT_DIMENSION_VERBOSE.csv -a -f $(DEBUG_TABLES_LOCATION)/MODIFIER_DIMENSION_VERBOSE.csv ] || (echo "CONCEPT_DIMENSION_VERBOSE.csv and MODIFIER_DIMENSION_VERBOSE.csv should be in $(DEBUG_TABLES_LOCATION)." && exit 1)
+	@[ -f $(OUTPUT_TABLES_LOCATION)/CONCEPT_DIMENSION.csv -a -f $(OUTPUT_TABLES_LOCATION)/MODIFIER_DIMENSION.csv ] || (echo "CONCEPT_DIMENSION.csv and MODIFIER_DIMENSION.csv should be in $(OUTPUT_TABLES_LOCATION)." && exit 1)
+	bash $(DEBUG_TABLES_LOCATION)/postprod.bash -outputF $(OUTPUT_TABLES_LOCATION) -inputF $(DEBUG_TABLES_LOCATION)
 
