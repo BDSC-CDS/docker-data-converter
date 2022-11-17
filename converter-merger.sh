@@ -86,9 +86,6 @@ loop_convert () {
 			echo "Debug mode activated for all batches. Make sure the ontology tables and the 'migration_logs' file are in $DESTDIR are also debug mode."
 			recipe="debug"
 			;;
-		"nothing")
-			recipe="nothing"
-			;;
 		*)
 			echo "Exiting."
 			exit 1
@@ -104,15 +101,16 @@ loop_convert () {
                 destloc="${DESTDIR}tables_batch${i}/"
 		TOMERGEDIRS+=($destloc)
                 mkdir -p $destloc
-		(cp "${DESTDIR}migration_logs.json" $destloc cp "${DESTDIR}MODIFIER_DIMENSION.csv" "${DESTDIR}CONCEPT_DIMENSION.csv" $destloc) || true
+		(cp "${DESTDIR}migrations_logs.json" $destloc && cp "${DESTDIR}MODIFIER_DIMENSION.csv" && "${DESTDIR}CONCEPT_DIMENSION.csv" $destloc) || true
 		override="DATALOCATION=${dataloc} OUTPUT_TABLES_LOCATION=${destloc}"
 		run="make $recipe $override"
 		$run || (make build $override && $run)
 		echo "Converting batch $i of ${#}, you can keep track of it by running 'make follow'"
-                docker wait data_converter 
-                make follow > "${destloc}/logs.txt"
+                make follow > ${DESTDIR}logs.txt
+		docker wait data_converter 
                 make down 
 		(rm "${destloc}CONCEPT_DIMENSION.csv ${destloc}MODIFIER_DIMENSION.csv") || true
+		[[ -f ${destloc}PATIENT_DIMENSION.csv ]] || (echo "The tables were not created." && exit 1)
 	done
 	echo "Finished converting all the batches."
 	return 
@@ -177,7 +175,7 @@ merge () {
 		# Propagate all the changes in OBSERVATION_FACT (except for -1 encounters which we do not touch)
 		awk -v offset=$OFFSET_PATIENT '(NR>1), $2+=offset' FS=, OFS=, "$OF" > "${DESTDIR}tmp_of"
 		awk -v offset=$OFFSET_ENCOUNTER '($1>0) ? $1+=offset : $1=$1' FS=, OFS=, "${DESTDIR}tmp_of" > "${DESTDIR}tmp2_of" && rm "${DESTDIR}tmp_of"
-		awk -v offset=$OFFSET_TSI '$23+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp2_of"
+		awk -v offset=$OFFSET_TSI '$NF+=offset' FS=, OFS=, "${DESTDIR}tmp2_of" >> ${DESTDIR}${OF_BASE} && rm "${DESTDIR}tmp2_of"
 	
 		# Update PROVIDER_DIMENSION by appending the new providers if not already in the target file 
 		comm -13 <(sort ${DESTDIR}${PR_BASE}) <(sort ${PR}) >> ${DESTDIR}${PR_BASE}
