@@ -79,15 +79,15 @@ loop_convert () {
 	### Convert each of the graphs to a dedicated folder.
 	### Update the TMPDIRS array with the path to each folder (in-order w.r. to the input list).
 	recipe="up-d"
-	echo "All batches will be converted in non-debug mode. If OK press Enter, if you want debug mode type 'debug' and press Enter."
+	echo "All batches will be converted in production (non-verbose) mode. If OK press Enter, if you want debug mode type 'verbose' and press Enter."
 	read mode
 	case $mode in 
 		"")
 			echo "About to start converting. Make sure the 'migrations_logs' file (if applicable) is in $DESTDIR , and the ontology tables if you want the (optional) consistency check to pass."
 			;;
-		"debug")
-			echo "Debug mode activated for all batches. Make sure the ontology tables and the 'migration_logs' file are in $DESTDIR are also debug mode."
-			recipe="debug"
+		"verbose")
+			echo "Verbose mode activated for all batches. Make sure the ontology tables and the 'migrations_logs' file are in $DESTDIR are also verbose mode."
+			recipe="verbose"
 			;;
 		*)
 			echo "Exiting."
@@ -104,16 +104,16 @@ loop_convert () {
                 destloc="${DESTDIR}tables_batch${i}/"
 		TOMERGEDIRS+=($destloc)
                 mkdir -p $destloc
-		(cp "${DESTDIR}migrations_logs.json" $destloc && cp "${DESTDIR}MODIFIER_DIMENSION.csv" && "${DESTDIR}CONCEPT_DIMENSION.csv" $destloc) || true
-		override="DATALOCATION=${dataloc} OUTPUT_TABLES_LOCATION=${destloc}"
+		(cp "${DESTDIR}migrations_logs.json" $destloc && cp "${DESTDIR}MODIFIER_DIMENSION" "${DESTDIR}CONCEPT_DIMENSION.csv" $destloc) || true
+		override="DATA_LOCATION=${dataloc} PRODUCTION_TABLES_LOCATION=${destloc} VERBOSE_TABLES_LOCATION=${destloc}" 
 		run="make $recipe $override"
 		$run || (make build $override && $run)
 		echo "Converting batch $i of ${#}, you can keep track of it by running 'make follow'"
                 make follow > ${DESTDIR}logs.txt
 		docker wait data_converter 
                 make down 
-		(rm "${destloc}CONCEPT_DIMENSION.csv ${destloc}MODIFIER_DIMENSION.csv") || true
-		[[ -f ${destloc}PATIENT_DIMENSION.csv ]] || (echo "The tables were not created." && exit 1)
+		(rm "${destloc}CONCEPT_DIMENSION*.csv ${destloc}MODIFIER_DIMENSION*.csv") || true
+		[ -f "${destloc}PATIENT_DIMENSION.csv" ] || (echo "The tables were not created." && exit 1)
 	done
 	echo "Finished converting all the batches."
 	return 
