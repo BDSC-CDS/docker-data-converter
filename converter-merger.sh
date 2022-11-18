@@ -80,7 +80,7 @@ loop_convert () {
 	read mode
 	case $mode in 
 		"")
-			echo "About to start converting. Make sure the 'migration_logs' file (if applicable) is in $DESTDIR , and the ontology tables if you want the (optional) consistency check to pass."
+			echo "About to start converting. Make sure the 'migrations_logs' file (if applicable) is in $DESTDIR , and the ontology tables if you want the (optional) consistency check to pass."
 			;;
 		"debug")
 			echo "Debug mode activated for all batches. Make sure the ontology tables and the 'migration_logs' file are in $DESTDIR are also debug mode."
