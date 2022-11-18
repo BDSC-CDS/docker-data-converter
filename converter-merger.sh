@@ -40,10 +40,13 @@ main () {
 	mkdir -p $DESTDIR
 	if [ $# == 1 ] ; then
 		lsmerges=($(ls $1))
-		TOMERGEDIRS=("${lsmerges[@]/#/$1\/}")
+		# Adding trailing slash if not there
+		root=$([[ $1 == */ ]] && echo "$1" || echo "$1/")
+		# Initializing the lists of folders to the current state
+		TOMERGEDIRS=("${lsmerges[@]/#/$root}")
 		echo "dirs to merge: ${TOMERGEDIRS[@]}"
-		lssource=($(ls $1))
-		SOURCEDIRS=("${lssource[@]/#/$1\/}")
+		SOURCEDIRS=${TOMERGEDIRS[@]}
+		echo "source dirs: ${SOURCEDIRS[@]}"
 	else
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
