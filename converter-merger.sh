@@ -33,11 +33,6 @@ main () {
 		*)
 			;;
 	esac
-	echo "Please enter a path to a global destination directory. It will be created automatically if not already there."
-	read -r DESTDIR
-	# Adding trailing slash
-	[[ "${DESTDIR}" != */ ]] && DESTDIR="${DESTDIR}/"
-	mkdir -p $DESTDIR
 	if [ $# == 1 ] ; then
 		lsmerges=($(ls $1))
 		# Adding trailing slash if not there
@@ -51,6 +46,12 @@ main () {
 		TOMERGEDIRS=$@
 		SOURCEDIRS=$@
 	fi	
+	echo "Please enter a path to a global destination directory. It will be created automatically if not already there. (default: ${1})" 
+	read -r DESTDIR
+	[[ $DESTDIR == "" ]] && DESTDIR=$1
+	# Adding trailing slash
+        [[ "${DESTDIR}" != */ ]] && DESTDIR="${DESTDIR}/"
+	mkdir -p $DESTDIR
 	case $tgt in 
 		"convert")
 			echo "Ready to convert the files."
