@@ -1,5 +1,5 @@
 #COPY YOUR VERBOSE (ONTOLOGY WITH CLEARTEXT BASECODES) TABLES LOCATION HERE
-VERBOSE_TABLES_LOCATION = /home/${USER}/debug_tables
+VERBOSE_TABLES_LOCATION = /home/${USER}/verbose_tables
 
 #COPY YOUR ABSOLUTE PATH TO THE FOLDER CONTAINING THE UNITS GRAPH HERE
 UNITS_GRAPH_LOCATION = /home/${USER}/units
@@ -16,11 +16,11 @@ CONFIG_FOLDER = /home/${USER}/docker-data-converter/config
 build:
 	docker build . -t data-converter:latest   
 up:
-	sed -i 's/"VERBOSE":"True"/"VERBOSE":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it --name data_converter -v $(DATA_LOCATION):/data -v $(UNITS_GRAPH_LOCATION):/units -v  $(PRODUCTION_TABLES_LOCATION):/output_tables -v $(CONFIG_FOLDER):/config data-converter:latest
 
 up-d:
-	sed -i 's/"VERBOSE":"True"/"VERBOSE":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATA_LOCATION):/data -v $(PRODUCTION_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
 
 follow:
@@ -38,8 +38,11 @@ bash:
 	docker exec -it data_converter bash
 	
 verbose: 
-	sed -i 's/"VERBOSE":"False"/"VERBOSE":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG":"False"/"DEBUG":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATA_LOCATION):/data -v $(VERBOSE_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
+
+debug: 
+	make verbose $@
 
 prod_from_debug:
 	@[ -f $(VERBOSE_TABLES_LOCATION)/CONCEPT_DIMENSION_VERBOSE.csv -a -f $(VERBOSE_TABLES_LOCATION)/MODIFIER_DIMENSION_VERBOSE.csv ] || (echo "CONCEPT_DIMENSION_VERBOSE.csv and MODIFIER_DIMENSION_VERBOSE.csv should be in $(VERBOSE_TABLES_LOCATION)." && exit 1)
