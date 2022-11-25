@@ -42,7 +42,7 @@ verbose:
 	docker run -it -d --name data_converter -v $(DATA_LOCATION):/data -v $(VERBOSE_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
 
 debug: 
-	make verbose $@
+	make verbose
 
 prod_from_debug:
 	@[ -f $(VERBOSE_TABLES_LOCATION)/CONCEPT_DIMENSION_VERBOSE.csv -a -f $(VERBOSE_TABLES_LOCATION)/MODIFIER_DIMENSION_VERBOSE.csv ] || (echo "CONCEPT_DIMENSION_VERBOSE.csv and MODIFIER_DIMENSION_VERBOSE.csv should be in $(VERBOSE_TABLES_LOCATION)." && exit 1)
