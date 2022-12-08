@@ -8,7 +8,7 @@ UNITS_GRAPH_LOCATION = /home/${USER}/units
 PRODUCTION_TABLES_LOCATION = /home/${USER}/output_tables
 
 # COPY YOUR ABSOLUTE PATH TO THE DATA GRAPHS HERE
-DATA_LOCATION = /home/${USER}/synthetic-data/
+DATA_LOCATION = /home/${USER}/data/
 
 CONFIG_FOLDER = /home/${USER}/docker-data-converter/config
 
@@ -16,11 +16,11 @@ CONFIG_FOLDER = /home/${USER}/docker-data-converter/config
 build:
 	docker build . -t data-converter:latest   
 up:
-	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG": "True"/"DEBUG": "False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it --name data_converter -v $(DATA_LOCATION):/data -v $(UNITS_GRAPH_LOCATION):/units -v  $(PRODUCTION_TABLES_LOCATION):/output_tables -v $(CONFIG_FOLDER):/config data-converter:latest
 
 up-d:
-	sed -i 's/"DEBUG":"True"/"DEBUG":"False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG": "True"/"DEBUG": "False"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATA_LOCATION):/data -v $(PRODUCTION_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
 
 follow:
@@ -38,7 +38,7 @@ bash:
 	docker exec -it data_converter bash
 	
 verbose: 
-	sed -i 's/"DEBUG":"False"/"DEBUG":"True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
+	sed -i 's/"DEBUG": "False"/"DEBUG": "True"/g' $(CONFIG_FOLDER)/i2b2_rdf_config.json
 	docker run -it -d --name data_converter -v $(DATA_LOCATION):/data -v $(VERBOSE_TABLES_LOCATION):/output_tables -v $(UNITS_GRAPH_LOCATION):/units -v $(CONFIG_FOLDER):/config data-converter:latest
 
 debug: 
