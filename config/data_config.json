@@ -61,13 +61,15 @@
             "https://biomedit.ch/rdf/sphn-ontology/sphn#SubjectPseudoIdentifier": {
                 "col": "PATIENT_NUM",
                 "overwrite": "False",
-                "pred_to_value": [
+                "mandatory": "True",
+		"pred_to_value": [
                     "https://biomedit.ch/rdf/sphn-ontology/sphn#hasIdentifier"
                 ]
             },
             "https://biomedit.ch/rdf/sphn-ontology/sphn#AdministrativeCase": {
                 "col": "ENCOUNTER_NUM",
                 "overwrite": "False",
+		"mandatory": "False",
                 "pred_to_value": [
                     "https://biomedit.ch/rdf/sphn-ontology/sphn#hasIdentifier"
                 ]
